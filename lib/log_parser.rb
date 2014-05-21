@@ -4,26 +4,18 @@ class LogParser
     @data_lines = data.split("\n")
   end
 
-  def dates
-    dates_array = []
-    @data_lines.each do |line|
-      date = line.scan /\[(\d.+)#/
-      date.flatten!
-      characters = date[0].chars
-      characters.delete_at(-1)
-      date = characters.join
-      dates_array << date
+  def log_dates
+    @data_lines.map do |line|
+      date(line)
     end
-    dates_array
   end
 
   def count_log_by_date(date)
-    new_date = Time.parse(date)
-    formatted_date = new_date.strftime("%d-%m-%y")
+    formatted_date = format_date(date)
     log = 0
-    dates_array = dates
+    dates_array = log_dates
     dates_array.each do |date_to_match|
-      if Time.parse(date_to_match).strftime("%d-%m-%y") == formatted_date
+      if format_date(date_to_match) == formatted_date
         log += 1
       end
     end
@@ -31,18 +23,40 @@ class LogParser
   end
 
   def count_log_types
-    types_array = []
     types_hash = {}
-    @data_lines.each do |line|
-      type = line.scan /( [A-Z]+ )/
-      if types_hash.has_key?(type.flatten[0].strip)
-        types_hash["#{type.flatten[0].strip}"] += 1
-      elsif types_hash["#{type.flatten[0].strip}"] == nil
-        types_hash["#{type.flatten[0].strip}"] = 1
+    log_types = @data_lines.map do |line|
+      type = log_type(line)
+      if types_hash.has_key?(type)
+        types_hash[type] += 1
+      elsif types_hash[type] == nil
+        types_hash[type] = 1
       end
-      types_array << types_hash
+      types_hash
     end
-    types_array.uniq
+    log_types.uniq
+  end
+
+  private
+
+  def format_date(date)
+    parse_date(date).strftime("%d-%m-%y")
+  end
+
+  def parse_date(date)
+    Time.parse(date)
+  end
+
+  def date(line)
+    date = line.scan /\[(\d.+)#/
+    date.flatten!
+    characters = date[0].chars
+    characters.delete_at(-1)
+    characters.join
+  end
+
+  def log_type(line)
+    type = line.scan /( [A-Z]+ )/
+    "#{type.flatten[0].strip}"
   end
 
 end

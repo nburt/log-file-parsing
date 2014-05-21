@@ -9,7 +9,7 @@ W, [2014-05-10T13:49:19.049408 #83516]  WARN -- : transition sticky bandwidth
 
   it 'can parse a log and return the dates the log covers' do
     log_parser = LogParser.new(data)
-    expect(log_parser.dates).to eq [
+    expect(log_parser.log_dates).to eq [
                                      '2014-05-10T13:49:19.049260',
                                      '2014-05-10T13:49:19.049408'
                                    ]
